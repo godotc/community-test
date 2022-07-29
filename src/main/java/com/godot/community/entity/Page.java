@@ -13,6 +13,15 @@ public class Page {
     private int rows;
     // query path (reuse paging link)
     private String path;
+    private int offset;
+
+    public int getOffset() {
+        return offset;
+    }
+
+    public void setOffset(int offset) {
+        this.offset = offset;
+    }
 
     public int getCurrent() {
         return current;

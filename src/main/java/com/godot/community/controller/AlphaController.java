@@ -12,6 +12,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
@@ -156,17 +157,45 @@ public class AlphaController {
         // Set cookie activate condition limit
         cookie.setPath("/community/alpha");
         // Set cookie TTL (expired time)
-        cookie.setMaxAge(60*10);
+        cookie.setMaxAge(60 * 10);
         // Seng cookie
         response.addCookie(cookie);
 
         return "set cookie";
     }
 
-    @RequestMapping(path = "/cookie/get",method = RequestMethod.GET)
+    @RequestMapping(path = "/cookie/get", method = RequestMethod.GET)
     @ResponseBody
-    public String getCookie(@CookieValue("code")String code){
+    public String getCookie(@CookieValue("code") String code) {
         System.out.println(code);
         return "get cookie";
     }
+
+    // Session Example
+    @RequestMapping(path = "/session/set", method = RequestMethod.GET)
+    @ResponseBody
+    public String setSession(HttpSession session) {
+        session.setAttribute("id", 1);
+        session.setAttribute("name", "Test");
+        return "set session";
+    }
+
+    @RequestMapping(path = "/session/get", method = RequestMethod.GET)
+    @ResponseBody
+    public String getSession(HttpSession session) {
+        System.out.println("id");
+        System.out.println("name");
+        return "get session";
+    }
+
+
+    // AJAX example
+    @RequestMapping(path = "/ajax", method = RequestMethod.POST)
+    @ResponseBody
+    public String testAjax(String name, int age) {
+        System.out.println(name);
+        System.out.println(age);
+        return CommunityUtil.getJSONString(0, "Success!");
+    }
+
 }

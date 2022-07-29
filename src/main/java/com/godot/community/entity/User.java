@@ -92,11 +92,6 @@ public class User {
         return headerUrl;
     }
 
-    public void setHeaderUrl(String headerUrl) {
-        this.headerUrl = headerUrl;
-    }
-
-
     @Override
     public String toString() {
         return "User{" +
@@ -112,4 +107,10 @@ public class User {
                 ", createTime=" + createTime +
                 '}';
     }
+
+    public void setHeaderUrl(String headerUrl) {
+        this.headerUrl = headerUrl;
+    }
+
+
 }
