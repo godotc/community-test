@@ -1,8 +1,10 @@
 package com.godot.community.controller;
 
 import com.godot.community.entity.User;
+import com.godot.community.service.FollowService;
 import com.godot.community.service.LikeService;
 import com.godot.community.service.UserService;
+import com.godot.community.util.CommunityConstant;
 import com.godot.community.util.CommunityUtil;
 import com.godot.community.util.HostHolder;
 import org.apache.commons.lang3.StringUtils;
@@ -26,7 +28,7 @@ import java.net.http.HttpResponse;
 
 @Controller
 @RequestMapping("/user")
-public class UserController {
+public class UserController implements CommunityConstant {
 
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
@@ -43,6 +45,8 @@ public class UserController {
     private HostHolder hostHolder;
     @Autowired
     private LikeService likeService;
+    @Autowired
+    private FollowService followService;
 
 
     @RequestMapping(path = "/setting", method = RequestMethod.GET)
@@ -121,10 +125,23 @@ public class UserController {
         }
 
         // User
-        model.addAttribute("user",user  );
+        model.addAttribute("user", user);
         // Like count
         int likeCount = likeService.findUserLikeCount(userId);
-        model.addAttribute("likeCount",likeCount);
+        model.addAttribute("likeCount", likeCount);
+
+        // Followed count
+        long followCount = followService.findFollowCount(userId, ENTITY_TYPE_USER);
+        model.addAttribute("followCount", followCount);
+        // Follower count
+        long followerCount = followService.findFollowerCount(ENTITY_TYPE_USER, userId);
+        model.addAttribute("followerCount", followerCount);
+        // Has followed
+        boolean hasFollowed = false;
+        if (hostHolder.getUser() != null) {
+            hasFollowed = followService.hasFollowed(hostHolder.getUser().getId(), ENTITY_TYPE_USER, userId);
+        }
+        model.addAttribute("hasFollowed", hasFollowed);
 
         return "/site/profile";
     }

@@ -3,6 +3,8 @@ package com.godot.community.controller;
 import com.godot.community.entity.User;
 import com.godot.community.service.UserService;
 import com.godot.community.util.CommunityConstant;
+import com.godot.community.util.CommunityUtil;
+import com.godot.community.util.RedisKeyUtil;
 import com.google.code.kaptcha.Producer;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.annotations.Param;
@@ -10,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -26,6 +29,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Controller
 public class LoginController implements CommunityConstant {
@@ -36,6 +40,8 @@ public class LoginController implements CommunityConstant {
     private UserService userService;
     @Autowired
     private Producer kaptChaProducer;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @Value("${server.servlet.context-path")
     private String contextPath;
@@ -85,13 +91,24 @@ public class LoginController implements CommunityConstant {
 
 
     @RequestMapping(path = "/kaptcha", method = RequestMethod.GET)
-    public void getKaptcha(HttpServletResponse response, HttpSession session) {
+    public void getKaptcha(HttpServletResponse response /*, HttpSession session*/) {
         // Generate verify code
         String text = kaptChaProducer.createText();
         BufferedImage image = kaptChaProducer.createImage(text);
 
         // Deposit code to session
-        session.setAttribute("kaptcha", text);
+        // session.setAttribute("kaptcha", text);
+
+        // Captcha's owner
+        String captchaOwner = CommunityUtil.generateUUID();
+        Cookie cookie = new Cookie("captchaOwner", captchaOwner);
+        cookie.setMaxAge(60);
+        cookie.setPath(contextPath);
+        response.addCookie(cookie);
+        // Deposit captcha into redis
+        String redisKey = RedisKeyUtil.getCaptchaKey(captchaOwner);
+        redisTemplate.opsForValue().set(redisKey, text, 60, TimeUnit.SECONDS);
+
 
         // Output image to browser
         response.setContentType("image/png");
@@ -104,10 +121,18 @@ public class LoginController implements CommunityConstant {
     }
 
     @RequestMapping(path = "/login", method = RequestMethod.POST)
-    public String login(String username, String password, String code, boolean rememberme, Model model, HttpSession session, HttpServletResponse response) {
+    public String login(String username, String password, String code, boolean rememberme,
+                        Model model /* ,HttpSession session*/, HttpServletResponse response,
+                        @CookieValue("captchaOwner") String captchaOwner) {
         // Verify code
-        String kaptcha = (String) session.getAttribute("kaptcha");
-        if (StringUtils.isBlank(kaptcha) || StringUtils.isBlank(code) || !kaptcha.equalsIgnoreCase(code)) {
+        // String kaptcha = (String) session.getAttribute("kaptcha");
+        String captcha = null;
+        if (StringUtils.isNotBlank(captchaOwner)) {
+            String redisKey = RedisKeyUtil.getCaptchaKey(captchaOwner);
+            captcha = (String) redisTemplate.opsForValue().get(redisKey);
+        }
+
+        if (StringUtils.isBlank(captcha) || StringUtils.isBlank(code) || !captcha.equalsIgnoreCase(code)) {
             model.addAttribute("codeMsg", "Verification code wrong!");
             return "/site/login";
         }
@@ -138,6 +163,7 @@ public class LoginController implements CommunityConstant {
     public String getForgetPage() {
         return "/site/forget";
     }
+
     @RequestMapping(path = "/get-verify-code", method = RequestMethod.GET)
     public String getVerifyCode(@Param("email") String email, Model model) {
         if (StringUtils.isBlank(email)) {
@@ -147,6 +173,7 @@ public class LoginController implements CommunityConstant {
         userService.getVerifyCode(email);
         return "/site/forget";
     }
+
     @RequestMapping(path = "/forget", method = RequestMethod.POST)
     public String resetPassWord(String email, String code, String password, Model model) {
         Map<String, Object> map = userService.resetPassword(email, code, password);
