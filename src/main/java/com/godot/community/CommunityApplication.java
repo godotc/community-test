@@ -3,9 +3,19 @@ package com.godot.community;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import javax.annotation.PostConstruct;
+
 @SpringBootApplication
 public class CommunityApplication {
 
-	public static void main(String[] args) {
-			SpringApplication.run(CommunityApplication.class, args); }
+    @PostConstruct
+    public void init() {
+        // Solve Netty start conflict problem (with redis)
+        // see Netty4Utils.setAvailableProcessors
+        System.setProperty("es.set.netty.runtime.available.processors", "false");
+    }
+
+    public static void main(String[] args) {
+        SpringApplication.run(CommunityApplication.class, args);
+    }
 }

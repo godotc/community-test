@@ -29,4 +29,17 @@ public interface MessageMapper {
     // update status
     int updateStatus(List<Integer> ids, int status);
 
+    // Query the newest message of One Topic
+    Message selectLatestNotice(int userId, String topic);
+
+    // Query amount of one Topic
+    int selectNoticeCount(int userId, String topic);
+
+    // Query unread message
+    int selectNoticeUnreadCount(int userId, String topic);
+
+    // Query message list of one topic of an uer
+    List<Message> selectNotices(int userId, String topic, int offset, int limit);
+
+
 }

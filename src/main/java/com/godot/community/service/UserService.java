@@ -31,6 +31,7 @@ public class UserService implements CommunityConstant {
     private MailClient mailClient;
     @Autowired
     private TemplateEngine templateEngine;
+
     //    @Autowired
 //    private LoginTicketMapper loginTicketMapper;
     @Autowired
