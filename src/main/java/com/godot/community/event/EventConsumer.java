@@ -1,8 +1,11 @@
 package com.godot.community.event;
 
 import com.alibaba.fastjson.JSONObject;
+import com.godot.community.entity.DiscussPost;
 import com.godot.community.entity.Event;
 import com.godot.community.entity.Message;
+import com.godot.community.service.DiscussPostService;
+import com.godot.community.service.ElasticsearchService;
 import com.godot.community.service.MessageService;
 import com.godot.community.util.CommunityConstant;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -23,6 +26,10 @@ public class EventConsumer implements CommunityConstant {
 
     @Autowired
     private MessageService messageService;
+    @Autowired
+    private DiscussPostService discussPostService;
+    @Autowired
+    private ElasticsearchService elasticsearchService;
 
     @KafkaListener(topics = {TOPIC_COMMENT, TOPIC_FOLLOW, TOPIC_LIKE})
     public void handleCommentMessage(ConsumerRecord record) {
@@ -58,5 +65,22 @@ public class EventConsumer implements CommunityConstant {
         message.setContent(JSONObject.toJSONString(content));
 
         messageService.addMessage(message);
+    }
+
+    // Consume publish event
+    @KafkaListener(topics = {TOPIC_PUBLISH})
+    public void handlePublishMessage(ConsumerRecord record) {
+        if (record == null || record.value() == null) {
+            logger.error("Message content is empty!");
+            return;
+        }
+        Event event = JSONObject.parseObject(record.value().toString(), Event.class);
+        if (event == null) {
+            logger.error("Message format error!");
+            return;
+        }
+
+        DiscussPost post = discussPostService.findDiscussPostById(event.getEntityId());
+        elasticsearchService.saveDiscussPost(post);
     }
 }

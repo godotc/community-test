@@ -1,9 +1,7 @@
 package com.godot.community.controller;
 
-import com.godot.community.entity.Comment;
-import com.godot.community.entity.DiscussPost;
-import com.godot.community.entity.Page;
-import com.godot.community.entity.User;
+import com.godot.community.entity.*;
+import com.godot.community.event.EventProducer;
 import com.godot.community.service.CommentService;
 import com.godot.community.service.DiscussPostService;
 import com.godot.community.service.LikeService;
@@ -35,6 +33,8 @@ public class DiscussPostController implements CommunityConstant {
     private CommentService commentService;
     @Autowired
     private LikeService likeService;
+    @Autowired
+    private EventProducer eventProducer;
 
     @RequestMapping(path = "/add", method = RequestMethod.POST)
     @ResponseBody
@@ -51,6 +51,15 @@ public class DiscussPostController implements CommunityConstant {
         post.setCreateTime(new Date());
         discussPostService.addDiscussPost(post);
 
+        // Trigger posted event
+        Event event = new Event()
+                .setTopic(TOPIC_PUBLISH)
+                .setUserId(user.getId())
+                .setEntityType(ENTITY_TYPE_POST)
+                .setEntityId(post.getId());
+        eventProducer.fireEvent(event);
+
+
         // Error will be handle in one in future
         return CommunityUtil.getJSONString(0, "Post Success!");
     }
@@ -63,7 +72,7 @@ public class DiscussPostController implements CommunityConstant {
         // Author
         User user = userService.findUserById(post.getUserId());
         model.addAttribute("user", user);
-        // Likes
+        // Like
         long likeCount = likeService.findEntityLikeCount(ENTITY_TYPE_POST, discussPostId);
         model.addAttribute("likeCount", likeCount);
         // Status
