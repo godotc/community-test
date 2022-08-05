@@ -47,7 +47,7 @@ public class HomeController implements CommunityConstant {
 
                 // likes
                 long likeCount = likeService.findEntityLikeCount(ENTITY_TYPE_POST, post.getId());
-                map.put("likeCount",likeCount);
+                map.put("likeCount", likeCount);
 
 
                 discussPosts.add(map);
@@ -61,5 +61,11 @@ public class HomeController implements CommunityConstant {
     @RequestMapping(path = "/error", method = RequestMethod.GET)
     public String getErrorPage() {
         return "/error/500";
+    }
+
+
+    @RequestMapping(path = "/denied", method = RequestMethod.GET)
+    public String getDeniedPage() {
+        return "/error/404";
     }
 }

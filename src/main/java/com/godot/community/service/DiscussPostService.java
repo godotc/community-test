@@ -40,11 +40,19 @@ public class DiscussPostService {
         return discussPostMapper.insertDiscussPost(post);
     }
 
-    public DiscussPost findDiscussPostById(int id){
+    public DiscussPost findDiscussPostById(int id) {
         return discussPostMapper.selectDiscussPostById(id);
     }
 
-    public  int updateCommentCount(int id , int commentCount){
-        return discussPostMapper.updateCommentCount(id,commentCount);
+    public int updateCommentCount(int id, int commentCount) {
+        return discussPostMapper.updateCommentCount(id, commentCount);
+    }
+
+    public int updateType(int id, int type) {
+        return discussPostMapper.updateType(id, type);
+    }
+
+    public int updateStatus(int id, int status) {
+        return discussPostMapper.updateStatus(id, status);
     }
 }
