@@ -10,6 +10,11 @@ public class RedisKeyUtil {
     private static final String PREFIX_CAPTCHA = "captcha";
     private static final String PREFIX_TICKET = "ticket";
     private static final String PREFIX_USER = "user";
+    private static final String PREFIX_UV = "uv";   // Unique Visitor
+    private static final String PREFIX_DAU = "dau"; // Daily Active User
+    private static final String PREFIX_POST = "post";
+
+//    private static final String PREFIX_POST = "post";
 
     // some entity's like
     // like:entity:entityType:entityId -> set(userId)
@@ -48,5 +53,30 @@ public class RedisKeyUtil {
     // User key
     public static String getUserKey(int userId) {
         return PREFIX_USER + SPLIT + userId;
+    }
+
+    // Single day UV
+    public static String getUVKey(String date) {
+        return PREFIX_UV + SPLIT + date;
+    }
+
+    // Section Limit of UV
+    public static String getUVKey(String beginDate, String endDate) {
+        return PREFIX_UV + SPLIT + beginDate + SPLIT + endDate;
+    }
+
+    // Single Day Active User
+    public static String getDAUKey(String date) {
+        return PREFIX_DAU + SPLIT + date;
+    }
+
+    //  Section's Active User
+    public static String getDAUKey(String startDate, String endDate) {
+        return PREFIX_DAU + SPLIT + startDate + SPLIT + endDate;
+    }
+
+    // Post Score key
+    public static String getPostScoreKey() {
+        return PREFIX_POST + SPLIT + "score";
     }
 }

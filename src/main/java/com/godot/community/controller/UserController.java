@@ -1,5 +1,6 @@
 package com.godot.community.controller;
 
+import com.godot.community.anaotation.LoginRequired;
 import com.godot.community.entity.User;
 import com.godot.community.service.FollowService;
 import com.godot.community.service.LikeService;
@@ -7,6 +8,7 @@ import com.godot.community.service.UserService;
 import com.godot.community.util.CommunityConstant;
 import com.godot.community.util.CommunityUtil;
 import com.godot.community.util.HostHolder;
+import com.qiniu.util.StringMap;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,12 +50,30 @@ public class UserController implements CommunityConstant {
     @Autowired
     private FollowService followService;
 
+    @Value("${qiniu.key.access}")
+    private String accessKey;
+    @Value("${qiniu.key.secret}")
+    private String secretKey;
+    @Value("${qiniu.bucket.header.name}")
+    private String headerBucketName;
+    @Value("${qiniu.bucket.header.url}")
+    private String headerBucketUrl;
 
+    @LoginRequired
     @RequestMapping(path = "/setting", method = RequestMethod.GET)
     public String getSettingPage() {
+        // Generate upload fileName
+        String fileName = CommunityUtil.generateUUID();
+        // Set response information
+        StringMap policy = new StringMap();
+        policy.put("returnBody", CommunityUtil.getJSONString(0
+        // Generate upload access key (AK)
+
         return "/site/setting";
     }
 
+    // Deprecate
+    @LoginRequired
     @RequestMapping(path = "/upload", method = RequestMethod.POST)
     public String uploadHeader(MultipartFile headerImage, Model model) {
 
@@ -93,6 +113,7 @@ public class UserController implements CommunityConstant {
         return "redirect:/index";
     }
 
+    // Deprecate
     @RequestMapping(path = "/header/{fileName}", method = RequestMethod.GET)
     public void getHeader(@PathVariable("fileName") String fileName, HttpServletResponse response) {
         // server file save path

@@ -8,7 +8,9 @@ import com.godot.community.service.CommentService;
 import com.godot.community.service.DiscussPostService;
 import com.godot.community.util.CommunityConstant;
 import com.godot.community.util.HostHolder;
+import com.godot.community.util.RedisKeyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,6 +30,8 @@ public class CommentController implements CommunityConstant {
     private EventProducer eventProducer;
     @Autowired
     private DiscussPostService discussPostService;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
 
     @RequestMapping(path = "/add/{discussPostId}", method = RequestMethod.POST)
@@ -61,6 +65,11 @@ public class CommentController implements CommunityConstant {
                     .setEntityType(ENTITY_TYPE_POST)
                     .setEntityId(discussPostId);
             eventProducer.fireEvent(event);
+
+
+            // Calculate post score
+            String redisKey = RedisKeyUtil.getPostScoreKey();
+            redisTemplate.opsForSet().add(redisKey, discussPostId);
         }
 
 

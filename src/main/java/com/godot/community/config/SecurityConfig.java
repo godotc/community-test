@@ -53,7 +53,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Comm
                         AUTHORITY_MODERATOR
                 )
                 .antMatchers(
-                        "/discuss/delete"
+                        "/discuss/delete",
+                        "/data/**"
                 ).hasAnyAuthority(
                         // TODO: Can't delete post as amin
                         AUTHORITY_ADMIN
