@@ -29,10 +29,16 @@ public class HomeController implements CommunityConstant {
     @Autowired
     private LikeService likeService;
 
+    @RequestMapping(path = "/", method = RequestMethod.GET)
+    public String root() {
+        return "forward:/index";
+    }
+
     @RequestMapping(path = "/index", method = RequestMethod.GET)
     public String getIndexPage(Model model, Page page,
-                               @RequestParam(name = "orderMode", defaultValue = "0") int orderMode) {
-        // Before call, springMVC will automatically instantiate Model & Page, and inject Page into Model.
+            @RequestParam(name = "orderMode", defaultValue = "0") int orderMode) {
+        // Before call, springMVC will automatically instantiate Model & Page, and
+        // inject Page into Model.
         // So, it can be directly access data int Page obj int thymeleaf.
         page.setRows(discussPostService.findDiscussPostRows(0));
         page.setPath("/index?orderMode=" + orderMode);
@@ -51,7 +57,6 @@ public class HomeController implements CommunityConstant {
                 long likeCount = likeService.findEntityLikeCount(ENTITY_TYPE_POST, post.getId());
                 map.put("likeCount", likeCount);
 
-
                 discussPosts.add(map);
             }
         }
@@ -65,7 +70,6 @@ public class HomeController implements CommunityConstant {
     public String getErrorPage() {
         return "/error/500";
     }
-
 
     @RequestMapping(path = "/denied", method = RequestMethod.GET)
     public String getDeniedPage() {

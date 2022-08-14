@@ -62,10 +62,10 @@ function setWonderful() {
 function setDelete() {
     $.post(
         CONTEXT_PATH + "/discuss/delete",
-        { "id": $("#postId").val() },
-        function (data) {
+        {"id":$("#postId").val()},
+        function(data) {
             data = $.parseJSON(data);
-            if (data.code == 0) {
+            if(data.code == 0) {
                 location.href = CONTEXT_PATH + "/index";
             } else {
                 alert(data.msg);

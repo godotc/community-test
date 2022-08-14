@@ -35,7 +35,6 @@ public class QuartzConfig {
         return factoryBean;
     }
 
-
     // Wried FACTORYBEAN into this JobDetail BEAN , TRIGGER JOB THAT ENCAPSULATE IN CONTAINER BY TRIGGER
     // Configurate Trigger (SimpleTriggerFactoryBean, CronTriggerFactoryBean)
 //    @Bean
@@ -73,4 +72,5 @@ public class QuartzConfig {
         return factoryBean;
     }
 
+    // TODO: Clean generate long image every few minutes.
 }

@@ -1,6 +1,6 @@
 <configuration>
     <contextName>community</contextName>
-    <property name="LOG_PATH" value="D:/work/JAVA/data"/>
+    <property name="LOG_PATH" value="/tmp"/>
     <property name="APPDIR" value="community"/>
 
     <!-- error file -->

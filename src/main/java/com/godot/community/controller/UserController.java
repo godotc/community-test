@@ -8,6 +8,7 @@ import com.godot.community.service.UserService;
 import com.godot.community.util.CommunityConstant;
 import com.godot.community.util.CommunityUtil;
 import com.godot.community.util.HostHolder;
+import com.qiniu.util.Auth;
 import com.qiniu.util.StringMap;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -19,6 +20,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -61,16 +63,37 @@ public class UserController implements CommunityConstant {
 
     @LoginRequired
     @RequestMapping(path = "/setting", method = RequestMethod.GET)
-    public String getSettingPage() {
+    public String getSettingPage(Model model) {
+
         // Generate upload fileName
         String fileName = CommunityUtil.generateUUID();
         // Set response information
         StringMap policy = new StringMap();
-        policy.put("returnBody", CommunityUtil.getJSONString(0
+        policy.put("returnBody", CommunityUtil.getJSONString(0));
         // Generate upload access key (AK)
+        Auth auth = Auth.create(accessKey, secretKey);
+        String uploadToken = auth.uploadToken(headerBucketName, fileName, 3600, policy);
+
+        model.addAttribute("uploadToken", uploadToken);
+        model.addAttribute("fileName", fileName);
 
         return "/site/setting";
     }
+
+    // Update header url
+    @RequestMapping(path = "/header/url", method = RequestMethod.POST)
+    @ResponseBody
+    public String updateHeaderUrl(String fileName) {
+        if (StringUtils.isBlank(fileName)) {
+            return CommunityUtil.getJSONString(1, "File name can't be null!");
+        }
+
+        String url = headerBucketUrl + "/" + fileName;
+        userService.updateHeader(hostHolder.getUser().getId(), url);
+
+        return CommunityUtil.getJSONString(0);
+    }
+
 
     // Deprecate
     @LoginRequired
